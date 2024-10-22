@@ -27,34 +27,39 @@ public class Main {
 	private static DOMImplementation implement;
 	private static Document doc;
 
+    /*
+    Objetivo:
+      <Alumnos>
+         <Alumno>
+             <nombre>Marcos</nombre>
+             <apellidos>Peladin</apellidos>
+             <ciclo>Informatica</ciclo>
+             <curso>1</curso>
+             <grupo>A</grupo>
+             <nia>123456</nia>
+             <genero>M</genero>
+             <fechadenacimiento>2000-01-01</fechadenacimiento>
+         </Alumno>
+         x5
+      </Alumnos>
+    */
 	public static void createElements(Alumno a) {
-		Element Alumno = doc.createElement("Alumno");
-		
-		Element nombre = doc.createElement("nombre");
-		nombre.appendChild(doc.createTextNode(a.getNombre()));
-		
-		Element apellidos = doc.createElement("apellidos");
-		apellidos.appendChild(doc.createTextNode(a.getApellidos()));
-		
-		Element ciclo = doc.createElement("ciclo");
-		ciclo.appendChild(doc.createTextNode(a.getCiclo()));
+		Element alumno = doc.createElement("Alumno");
+		createChildElement(alumno, "nombre", a.getNombre());
+		createChildElement(alumno, "apellidos", a.getApellidos());
+		createChildElement(alumno, "ciclo", a.getCiclo());
+		createChildElement(alumno, "curso", a.getCurso());
+		createChildElement(alumno, "grupo", a.getGrupo());
+		createChildElement(alumno, "nia", String.valueOf(a.getNia()));
+		createChildElement(alumno, "genero", String.valueOf(a.getGenero()));
+		createChildElement(alumno, "fechadenacimiento", a.getFechadenacimiento().toString());
+		doc.getDocumentElement().appendChild(alumno);
+	}
 
-		Element curso = doc.createElement("curso");
-		curso.appendChild(doc.createTextNode(a.getCurso()));
-
-		Element grupo = doc.createElement("grupo");
-		grupo.appendChild(doc.createTextNode(a.getGrupo()));
-
-		Element nia = doc.createElement("nia");
-		nia.appendChild(doc.createTextNode(String.valueOf(a.getNia())));
-
-		Element genero = doc.createElement("genero");
-		genero.appendChild(doc.createTextNode(String.valueOf(a.getGenero())));
-
-		Element fechadenacimiento = doc.createElement("fechadenacimiento");
-		fechadenacimiento.appendChild(doc.createTextNode(a.getFechadenacimiento().toString()));
-
-		assignHierarchiesElements(Alumno, nombre, apellidos, ciclo, curso, grupo, nia, genero, fechadenacimiento);
+	public static void createChildElement(Element parent, String name, String contenido) {
+		Element element = doc.createElement(name);
+		element.appendChild(doc.createTextNode(contenido));
+		parent.appendChild(element);
 	}
 
 	public static void assignHierarchiesElements(Element Alumno, Element nombre, Element apellidos, Element ciclo,
@@ -70,35 +75,37 @@ public class Main {
 		doc.getDocumentElement().appendChild(Alumno);
 	}
 
-	public static void main(String[] args) {
-		studentList = CreacionDeAlumnos.create5students();
+	private static void createDocument() {
+	    try {
+	        fnaf = DocumentBuilderFactory.newInstance(); 
+	        constructor = fnaf.newDocumentBuilder();
+	        implement = constructor.getDOMImplementation();
+	        doc = implement.createDocument(null, "Alumnos", null);
+	        doc.setXmlVersion("1.0");
+	    } catch (ParserConfigurationException e) {
+	        e.printStackTrace();
+	    }
+	}
+
+
+	private static void createFile(String name) {
 		try {
-			fnaf = DocumentBuilderFactory.newInstance();
-			constructor = fnaf.newDocumentBuilder();
-			implement = constructor.getDOMImplementation();
-			doc = implement.createDocument(null, "Alumnos", null);
-			doc.setXmlVersion("1.0");
-
-			for (Alumno a : studentList) {
-				createElements(a);
-			}
-
 			Source sauce = new DOMSource(doc);
-			Result result = new StreamResult(new File("resultado.xml"));
+			Result result = new StreamResult(new File(name));
 			Transformer optimus = TransformerFactory.newInstance().newTransformer();
 			optimus.transform(sauce, result);
-
-		} catch (ParserConfigurationException e) {
-			e.printStackTrace();
-		} catch (TransformerConfigurationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (TransformerFactoryConfigurationError e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (TransformerException e) {
-			// TODO Auto-generated catch block
+		} catch (TransformerException | TransformerFactoryConfigurationError e) {
 			e.printStackTrace();
 		}
+
+	}
+
+	public static void main(String[] args) {
+		studentList = CreacionDeAlumnos.create5students();
+		createDocument();
+		for (Alumno a : studentList) {
+			createElements(a);
+		}
+		createFile("resultado.xml");
 	}
 }
